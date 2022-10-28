@@ -2,6 +2,7 @@ import base64
 import io
 import getpass
 import readline
+import urllib.parse
 import qrcode as qrc
 
 def create_totp_url(issuer, accountname, encoded_secret_string):
@@ -12,6 +13,7 @@ def create_totp_url(issuer, accountname, encoded_secret_string):
 
     # remove whitespace from secret string
     stripped_encoded_secret_string = encoded_secret_string.replace(' ', '')
+    issuer = urllib.parse.quote(issuer)
 
     url = f"otpauth://totp/{issuer}:{accountname}?secret={stripped_encoded_secret_string.upper()}&issuer={issuer}"
     return url
@@ -33,10 +35,13 @@ def print_qrcode(url):
     print(buffer.read())
 
 if __name__ == '__main__':
-    issuer = input('Issuer: ')
-    accountname = input('Account: ')
-    secret = getpass.getpass('Secret: ')
+    while True:
+        issuer = input('Issuer (empty string for exit):\n-> ')
+        if issuer == '':
+            break
+        accountname = input('Account:\n-> ')
+        secret = getpass.getpass('Secret:\n-> ')
 
-    url = create_totp_url(issuer, accountname, secret)
-    print(url)
-    print_qrcode(url)
+        url = create_totp_url(issuer, accountname, secret)
+        print(f"\nURL: {url}")
+        print_qrcode(url)
