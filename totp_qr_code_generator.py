@@ -1,5 +1,7 @@
 import base64
 import io
+import getpass
+import readline
 import qrcode as qrc
 
 def create_totp_url(issuer, accountname, encoded_secret_string):
@@ -11,7 +13,7 @@ def create_totp_url(issuer, accountname, encoded_secret_string):
     # remove whitespace from secret string
     stripped_encoded_secret_string = encoded_secret_string.replace(' ', '')
 
-    url = f"otpauth://totp/{issuer}:{accountname}?secret={stripped_encoded_secret_string}&issuer={issuer}"
+    url = f"otpauth://totp/{issuer}:{accountname}?secret={stripped_encoded_secret_string.upper()}&issuer={issuer}"
     return url
 
 def encode_secret_string(secret_string):
@@ -31,7 +33,10 @@ def print_qrcode(url):
     print(buffer.read())
 
 if __name__ == '__main__':
-    # print(encode_secret_string('ABCDE'))
-    url = create_totp_url('GMail', 'a@b.com', 'secr etto ken1')
+    issuer = input('Issuer: ')
+    accountname = input('Account: ')
+    secret = getpass.getpass('Secret: ')
+
+    url = create_totp_url(issuer, accountname, secret)
     print(url)
     print_qrcode(url)
