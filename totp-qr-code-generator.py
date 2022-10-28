@@ -2,15 +2,25 @@ import base64
 import io
 import qrcode as qrc
 
-def create_totp_url(issuer, accountname, secret):
+def create_totp_url(issuer, accountname, encoded_secret_string):
     # Example from https://github.com/google/google-authenticator/wiki/Key-Uri-Format
     # otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example
 
-    # check issuer and accountname for ':' and other forbidden characters
-    encodedsecret = base64.b32encode(secret.encode('ascii')).decode('ascii').rstrip('=')
+    # TODO: check issuer and accountname for ':' and other forbidden characters
 
-    url = f"otpauth://totp/{issuer}:{accountname}?secret={encodedsecret}&issuer={issuer}"
+    # remove whitespace from secret string
+    stripped_encoded_secret_string = encoded_secret_string.replace(' ', '')
+
+    url = f"otpauth://totp/{issuer}:{accountname}?secret={stripped_encoded_secret_string}&issuer={issuer}"
     return url
+
+def encode_secret_string(secret_string):
+    encoded_secret_string = encode_secret_bytes(secret_string.encode('utf-8'))
+    return encoded_secret_string
+
+def encode_secret_bytes(secret_bytes):
+    encoded_secret_bytes = base64.b32encode(secret_bytes).decode('ascii').rstrip('=')
+    return encoded_secret_bytes
 
 def print_qrcode(url):
     qrcode = qrc.QRCode()
@@ -21,6 +31,7 @@ def print_qrcode(url):
     print(buffer.read())
 
 if __name__ == '__main__':
-    url = create_totp_url('GMail', 'a@b.com', 'secretsecretsecretsecret')
+    # print(encode_secret_string('ABCDE'))
+    url = create_totp_url('GMail', 'a@b.com', 'secr etto ken1')
     print(url)
     print_qrcode(url)
